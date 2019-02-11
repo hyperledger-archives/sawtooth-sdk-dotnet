@@ -9,16 +9,15 @@
 #   > dotnet run Processor tcp://127.0.0.1:4004
 #   > dotnet run Client mykey set 42
 
-FROM microsoft/dotnet
+FROM microsoft/dotnet:sdk
 
-COPY . /sawtooth/sdk
+WORKDIR /sdk
+COPY . .
+RUN dotnet restore src/
 
-EXPOSE 4004 8008
+WORKDIR /core
+RUN git clone https://github.com/hyperledger/sawtooth-core.git
 
-WORKDIR /sawtooth/sdk/src
-
-RUN dotnet restore \
-    && /sawtooth/sdk/bin/build_protos \
-    && dotnet publish -c Release -f netstandard2.0 Sdk \
-    && dotnet pack -o . --runtime netstandard2.0 Sdk \
-    && dotnet test Test
+ENTRYPOINT find /core/sawtooth-core/protos/ -name '*.proto' -print0 \
+    | xargs -r0 ~/.nuget/packages/google.protobuf.tools/3.5.1/tools/linux_x64/protoc \
+    --csharp_out=/sdk/src/Protobuf --proto_path=/core/sawtooth-core/protos/ 
