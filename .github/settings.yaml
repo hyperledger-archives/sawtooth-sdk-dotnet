@@ -1,0 +1,9 @@
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+repository:
+  name: sawtooth-sdk-dotnet
+  description: Archive of sawtooth-sdk-dotnet
+  archived: true
+  private: false
