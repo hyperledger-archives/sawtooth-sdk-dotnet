@@ -14,6 +14,7 @@
  * limitations under the License.
  * -----------------------------------------------------------------------------
  */
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -90,7 +91,16 @@ namespace Sawtooth.Sdk.Client
                 S = Secp256k1.N.Subtract(S);
             }
 
-            return R.ToByteArrayUnsigned().Concat(S.ToByteArrayUnsigned()).ToArray();
+            // Ensure both signature pairs are 32 bytes.
+            var rBytes = R.ToByteArrayUnsigned();
+            var sBytes = S.ToByteArrayUnsigned();
+            var signatureBytes = new byte[64];
+            
+            var rOffset = signatureBytes.Length / 2 - rBytes.Length;
+            Array.Copy(rBytes, 0, signatureBytes, rOffset, rBytes.Length);
+            var sOffset = signatureBytes.Length - sBytes.Length;
+            Array.Copy(sBytes, 0, signatureBytes, sOffset, sBytes.Length);
+            return signatureBytes;
         }
 
         /// <summary>
